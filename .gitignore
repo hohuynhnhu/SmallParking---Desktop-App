@@ -1,0 +1,35 @@
+*.env
+yolov8n.pt
+
+serviceAccountKey.json
+datasetkytu/
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Build / distribution
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+**/yolov8n.pt
+**/yolov11n.pt
+**/dataset/
+**/Datasets/
+runs/
+.idea/
+Dataset_Siamese/
+TrainVungKyTu/dataset_split/
