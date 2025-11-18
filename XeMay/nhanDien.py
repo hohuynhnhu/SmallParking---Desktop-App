@@ -62,7 +62,7 @@ cnn_model.load_state_dict(torch.load(model_path, map_location=device))
 cnn_model.to(device)
 cnn_model.eval()
 
-print("✅ Loaded CNN model (PyTorch)")
+print(" Loaded CNN model (PyTorch)")
 
 # =========================
 # OCR Tools
@@ -166,7 +166,7 @@ def detect_license_plate():
         filetypes=[("Image files", "*.jpg;*.jpeg;*.png;*.bmp")]
     )
     if not file_path:
-        print("❌ Bạn chưa chọn ảnh nào")
+        print(" Bạn chưa chọn ảnh nào")
         return None, None
 
     frame = cv2.imread(file_path)

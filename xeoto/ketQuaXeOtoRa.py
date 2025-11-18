@@ -44,7 +44,7 @@ def process_car_image():
                 best_plate = frame[y1:y2, x1:x2]
 
     if best_plate is None:
-        print("❌ Không tìm thấy biển số trong ảnh.")
+        print("Không tìm thấy biển số trong ảnh.")
 
     # ========== Nhận diện logo ==========
     results = model(file_path)

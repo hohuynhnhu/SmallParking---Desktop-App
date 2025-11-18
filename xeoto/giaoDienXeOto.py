@@ -36,7 +36,7 @@ except FileNotFoundError:
     autoData = False
 
 def handle_image(image):
-    """Trả về ImageTk.PhotoImage từ local path hoặc URL"""
+
     if isinstance(image, str) and image.startswith(("http://", "https://")):
         # Nếu là URL → tải ảnh về trước
         resp = requests.get(image, stream=True)
@@ -108,7 +108,7 @@ def show_plate_on_canvas(canvas, best_plate):
         canvas.create_text(
             canvas.winfo_width() // 2,
             canvas.winfo_height() // 2,
-            text="❌ Không có dữ liệu",
+            text=" Không có dữ liệu",
             font=("Arial", 20),
             fill="black"
         )
@@ -122,7 +122,7 @@ def show_plate_on_canvas(canvas, best_plate):
             img_rgb = cv2.cvtColor(best_plate, cv2.COLOR_BGR2RGB)
             img_pil = Image.fromarray(img_rgb)
         except Exception as e:
-            print("❌ Lỗi convert numpy array:", e)
+            print(" Lỗi convert numpy array:", e)
             return
 
     # Nếu best_plate là URL
@@ -132,7 +132,7 @@ def show_plate_on_canvas(canvas, best_plate):
             resp.raise_for_status()
             img_pil = Image.open(BytesIO(resp.content)).convert("RGB")
         except Exception as e:
-            print("❌ Lỗi load ảnh từ URL:", e)
+            print("Lỗi load ảnh từ URL:", e)
             return
 
     # Nếu best_plate là đường dẫn local
@@ -140,11 +140,11 @@ def show_plate_on_canvas(canvas, best_plate):
         try:
             img_pil = Image.open(best_plate).convert("RGB")
         except Exception as e:
-            print("❌ Lỗi load ảnh từ file:", e)
+            print("Lỗi load ảnh từ file:", e)
             return
 
     else:
-        print("❌ best_plate không phải định dạng hỗ trợ:", type(best_plate))
+        print("best_plate không phải định dạng hỗ trợ:", type(best_plate))
         return
 
     # Resize ảnh để vừa canvas
@@ -174,7 +174,7 @@ def label_custom_text(window, title, content, row, column, rowspan=1, columnspan
 
     text_widget.tag_add("center", "2.0", "end")  # dòng 2 trở đi
     text_widget.tag_config("center", justify="center")
-    
+
     # Không cho chỉnh sửa text
     text_widget.config(state="disabled", bg="gray")
 
@@ -245,12 +245,12 @@ def btn_quet_xe_ra(window, listCanvasVao: utils.ListCanvas, listCanvasRa: utils.
     load_image(canvas=listCanvasRa.duoi_xe, img_path=image_duoi_xe)
     show_plate_on_canvas(canvas=listCanvasRa.logo, best_plate=image_logo)
 
-def click_auto(btnAuto):
-    global autoData
-    autoData = not autoData
-    btnAuto.config(text=f"Auto: {'Bật' if autoData else 'Tắt'}")
-    with open("state.json", "w") as f:
-        json.dump({"AUTO": autoData}, f)
+# def click_auto(btnAuto):
+#     global autoData
+#     autoData = not autoData
+#     btnAuto.config(text=f"Auto: {'Bật' if autoData else 'Tắt'}")
+#     with open("state.json", "w") as f:
+#         json.dump({"AUTO": autoData}, f)
 
 def on_close(window):
     print("Đang thoát chương trình...")
@@ -273,11 +273,11 @@ def run_main_o_to():
     window.geometry("300x250")
 
     # Tiêu đề
-    label_vao = tk.Label(window, text="Vào", font=("Arial", 24))
-    label_vao.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
+    # label_vao = tk.Label(window, text="Vào", font=("Arial", 24))
+    # label_vao.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
 
-    label_vao = tk.Label(window, text="Ra", font=("Arial", 24))
-    label_vao.grid(row=1, column=3, columnspan=2, padx=10, pady=10)
+    # label_vao = tk.Label(window, text="Ra", font=("Arial", 24))
+    # label_vao.grid(row=1, column=3, columnspan=2, padx=10, pady=10)
 
     # Thông báo
     label_bien_so_xe = label_custom_text(window=window, title="BSX", content="Chưa có dữ liệu", row=0, column=0)
@@ -345,11 +345,11 @@ def run_main_o_to():
     btn2 = tk.Button(window, text="Quét xe ô tô ra", font=("Arial", 16), command=partial(btn_quet_xe_ra, window, listCanvasVao, listCanvasRa, labels), width=20, height=5, bg='yellow')
     btn2.grid(row=3, column=2, padx=10, pady=10)
 
-    btnAuto = tk.Button(window, text=f"Auto: {'Bật' if autoData else 'Tắt'}", command=lambda: click_auto(btnAuto), width=20, height=3, bg='orange')
-    btnAuto.grid(row=4, column=2, padx=10, pady=10)
+    # btnAuto = tk.Button(window, text=f"Auto: {'Bật' if autoData else 'Tắt'}", command=lambda: click_auto(btnAuto), width=20, height=3, bg='orange')
+    # btnAuto.grid(row=4, column=2, padx=10, pady=10)
 
-    btn3 = tk.Button(window, text="Quét QR", command=lambda: threading.Thread(target=btn_Qr).start(), width=20, height=5, bg="lightblue")
-    btn3.grid(row=1, column=2, padx=10, pady=(10, 10))  # pady trên 30, dưới 10
+    # btn3 = tk.Button(window, text="Quét QR", command=lambda: threading.Thread(target=btn_Qr).start(), width=20, height=5, bg="lightblue")
+    # btn3.grid(row=1, column=2, padx=10, pady=(10, 10))  # pady trên 30, dưới 10
 
     window.state('zoomed')
 

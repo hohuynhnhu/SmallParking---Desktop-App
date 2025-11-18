@@ -328,8 +328,8 @@ def run_main_xe_may():
     )
     btn2.grid(row=3, column=2, padx=10, pady=(30, 10))  # pady trên 30, dưới 10
 
-    btn3 = tk.Button(window, text="Quét QR", command=lambda: threading.Thread(target=btn_Qr).start(), width=20, height=5, bg="lightblue")
-    btn3.grid(row=1, column=3, padx=10, pady=(10, 10))  # pady trên 30, dưới 10
+    # btn3 = tk.Button(window, text="Quét QR", command=lambda: threading.Thread(target=btn_Qr).start(), width=20, height=5, bg="lightblue")
+    # btn3.grid(row=1, column=3, padx=10, pady=(10, 10))  # pady trên 30, dưới 10
 
 
     window.state('zoomed')

@@ -1,7 +1,6 @@
 import json
 import sys
 import tkinter as tk
-import subprocess
 from XeMay.giaoDienXeMay import run_main_xe_may
 from xeoto.giaoDienXeOto import run_main_o_to
 

@@ -4,21 +4,20 @@ import os
 
 class FirebaseService:
     def __init__(self):
-        print("Đã chạy innit")
+        print("Đã chạy __init__")
         if not firebase_admin._apps:
-            # Lấy đường dẫn tuyệt đối tới file json cùng cấp
-            print("Đã chạy if")
-            dir_path = os.path.dirname(os.path.abspath(__file__))
-            cred_path = os.path.join(dir_path, "serviceAccountKey.json")
-            cred = credentials.Certificate(cred_path)
-            firebase_admin.initialize_app(cred, {
-                'databaseURL': 'https://tramxeuth-default-rtdb.firebaseio.com/'
-            })
+            print("Đang khởi tạo Firebase...")
 
+            # Đường dẫn tới serviceAccountKey.json
+            cred_path = "D:/thuc_tap_tot_nghiep/smallPaking-Destop/serviceAccountKey.json"
+            cred = credentials.Certificate(cred_path)
+
+            # ✅ Khởi tạo CHO CẢ Realtime Database VÀ Firestore
+            firebase_admin.initialize_app(cred, {
+                'databaseURL': 'https://smallparking-41c54-default-rtdb.firebaseio.com/'
+            })
+            print("✓ Firebase đã được khởi tạo")
     def get_all_license_plates(self):
-        """
-        Trả về danh sách tất cả các biển số trong 'biensotrongbai'
-        """
         ref = db.reference("biensotrongbai")
         data = ref.get()
         return list(data.keys()) if data else []

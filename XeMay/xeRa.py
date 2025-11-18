@@ -1,53 +1,17 @@
-import tkinter as tk
-from PIL import Image, ImageTk
-import requests
-from io import BytesIO
-import threading
+
+import sys
+import os
 from datetime import datetime
 from XeMay.nhanDien import detect_license_plate
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from firebase_service import FirebaseService
 from face_detection.train_face import capture_face_and_upload
 from deepface import DeepFace
 from firebase_admin import firestore
 import time
 
-# Hàm kiểm tra và cập nhật số lượt khi ra
-def update_soluot_khira(bien_so_xe):
-    db = firestore.client()
-    doc_col = db.collection("thongtindangky")
-    xe_doc_ref = doc_col.get()
-    for xe_doc in xe_doc_ref:
-        xe_data = xe_doc.to_dict()
-        ds_bien_so_xe = [xe_doc['biensoxe'], xe_doc['biensophu']['bienSo']]
-        if bien_so_xe in ds_bien_so_xe:
-            so_luot_moi = xe_data['luot'] - 1
-            if so_luot_moi >= 0:
-                update_xe_doc_ref = doc_col.document(xe_doc.id)
-                update_xe_doc_ref.update({"luot":so_luot_moi})
-                print("Số lượt hợp lệ. Cho xe ra")
-                return True
-            else:
-                print("Số lượt ko đủ. Bạn cần mua thêm lượt")
-                return False
-    return False
 
-def is_khach_uutien(bien_so_xe):
-    db = firestore.client()
-    doc_col = db.collection("thongtinkhach")
-    xe_doc_ref = doc_col.get()
-    for xe_doc in xe_doc_ref:
-        xe_data = xe_doc.to_dict()
-        if bien_so_xe == xe_data['bienso']:
-            if xe_data['uutien']:
-                return True
-            else:
-                return False
-    return False
-
-
-# =====================
-# Hàm xử lý quét và so khớp
-# =====================
+db = firestore.client()
 def run_license_scan_ra(label_status, canvas_old, canvas_new,root):
     firebase_service = FirebaseService()
     db = firestore.client()
@@ -84,7 +48,7 @@ def run_license_scan_ra(label_status, canvas_old, canvas_new,root):
             # Kiểm tra số lượt có hợp lệ ko
             is_hople = update_soluot_khira(bien_so_quet)
             if not is_hople:
-                label_status.config(text=f"Số lượt ra còn lại của biển số {bien_so_quet} không đủ ❌", bg="yellow")
+                label_status.config(text=f"Số lượt ra còn lại của biển số {bien_so_quet} không đủ ", bg="yellow")
                 label_status.update()
                 time.sleep(2)
                 break
@@ -120,22 +84,6 @@ def run_license_scan_ra(label_status, canvas_old, canvas_new,root):
         # 5. Chụp khuôn mặt mới
         image_url_new_face = capture_face_and_upload()
 
-        # # 6. Hiển thị 2 ảnh lên GUI
-        # def show_image_from_url(canvas, url):
-        #     if url:
-        #         try:
-        #             response = requests.get(url)
-        #             img = Image.open(BytesIO(response.content)).resize((200, 200))
-        #             img_tk = ImageTk.PhotoImage(img)
-        #             canvas.img_tk = img_tk  # lưu reference
-        #             canvas.create_image(0, 0, anchor="nw", image=img_tk)
-        #         except:
-        #             pass
-        #
-        # canvas_old.delete("all")
-        # canvas_new.delete("all")
-        # show_image_from_url(canvas_old, url_khuonmatvao)
-        # show_image_from_url(canvas_new, image_url_new_face)
 
 
 
@@ -162,7 +110,7 @@ def run_license_scan_ra(label_status, canvas_old, canvas_new,root):
                 verified_custom = dist <= CUSTOM_THRESHOLD
                 same_person = verified_default and verified_custom
 
-                print(f"📊 Khoảng cách = {dist:.4f}, Ngưỡng mặc định = {thr:.4f}, Ngưỡng custom = {CUSTOM_THRESHOLD}")
+                print(f"Khoảng cách = {dist:.4f}, Ngưỡng mặc định = {thr:.4f}, Ngưỡng custom = {CUSTOM_THRESHOLD}")
                 if same_person:
 
                     print("Kết quả: CÙNG 1 NGƯỜI")
@@ -174,52 +122,49 @@ def run_license_scan_ra(label_status, canvas_old, canvas_new,root):
 
         if same_person:
             check_plate = True
+            print("=" * 50)
+            print("✓ Xác nhận cùng 1 người")
 
-            # Xử lý tiếp dữ liệu phía sau như update Firestore
             trangthai = bien_so_data.get('trangthai')
+            print(f"Trạng thái: {trangthai}")
+
             if trangthai is False:
-                print("Biển số có 'trangthai' = False.")
-                firebase_service.update_license_plate_field(bien_so_quet, True)
-                firebase_service.delete_license_plate(bien_so_quet)
+                print("→ Bắt đầu update Firestore...")
 
-                # Lấy document xe
-                doc = xe_doc_ref.get()
-                if doc.exists:
-                    data = doc.to_dict()
-                    solanra = data.get("solanra", 0)
-                else:
-                    solanra = 0
+                # Update license plate
+                try:
+                    firebase_service.update_license_plate_field(bien_so_quet, True)
+                    print("✓ Update license plate OK")
+                except Exception as e:
+                    print(f"✗ Lỗi update license plate: {e}")
 
-                solanra += 1
-                xe_doc_ref.set({"solanra": solanra}, merge=True)
+                # Update solanra
+                try:
+                    doc = xe_doc_ref.get()
+                    solanra = doc.to_dict().get("solanra", 0) if doc.exists else 0
+                    solanra += 1
+                    xe_doc_ref.set({"solanra": solanra}, merge=True)
+                    print(f"✓ Update solanra = {solanra} OK")
+                except Exception as e:
+                    print(f"✗ Lỗi update solanra: {e}")
 
-                # Thời gian hiện tại
-                time_now = datetime.now().strftime("%H:%M:%S")
+                # Update timeline
+                try:
+                    if timeline_ref:
+                        time_now = datetime.now().strftime("%H:%M:%S")
+                        timeline_ref.set({
+                            "timeout": time_now,
+                            "biensoxera": url_image_detected,
+                            "khuonmatra": image_url_new_face
+                        }, merge=True)
+                        print(f"✓ Update timeline {timeline_doc_id} OK")
+                    else:
+                        print("⚠ Không có timeline để update")
+                except Exception as e:
+                    print(f"✗ Lỗi update timeline: {e}")
 
-                # Ghi vào timeline gần nhất
-                if timeline_ref:
-                    timeline_ref.set({
-                        "timeout": time_now,
-                        "biensoxera": url_image_detected,
-                        "khuonmatra": image_url_new_face
-                    }, merge=True)
-                    print(f"Đã cập nhật timeline {timeline_doc_id}")
-                else:
-                    print("Không tìm thấy timeline để cập nhật.")
-                return
-            else:
-
-
-                # Nếu trạng thái True, cảnh báo
-                firebase_service.update_canhbao(bien_so_quet, True)
-                check_warn = True
-
-                print("Xe đã ra trước đó, đã gửi cảnh báo.")
-                return check_warn
-            time.sleep(2)  # delay để người dùng thấy thông báo
-
-
-            break
+                print("=" * 50)
+                return check_plate
         else:
 
             label_status.config(text=f" Không phải cùng người", bg="red")
@@ -227,28 +172,6 @@ def run_license_scan_ra(label_status, canvas_old, canvas_new,root):
         label_status.update()
         time.sleep(2)  # delay giữa các lần quét
 
-# =====================
-# GUI Tkinter
-# # =====================
-# root = tk.Tk()
-# root.title("Hệ thống quản lý xe tự động")
-# root.geometry("700x400")
-#
-# label_status = tk.Label(root, text="Đang chờ quét xe...", font=("Arial", 18), width=60, height=2, bg="gray")
-# label_status.pack(pady=10)
-#
-# frame_images = tk.Frame(root)
-# frame_images.pack()
-#
-# canvas_old = tk.Canvas(frame_images, width=200, height=200, bg="white")
-# canvas_old.pack(side="left", padx=20)
-#
-# canvas_new = tk.Canvas(frame_images, width=200, height=200, bg="white")
-# canvas_new.pack(side="right", padx=20)
-#
-#
-#
-# root.mainloop()
 
 
 

@@ -80,9 +80,3 @@ def compare_images(img1_path, img2_path, threshold=0.5):
     else:
         print("❌ Hai ảnh là KHÁC XE")
 
-# ==== Test thử ====
-# compare_images("xe1 (4).jpg", "xe1B.jpg")# cùng xe
-# compare_images("xe1 (4).jpg", "clear.jpg") khác xe khác màu
-# compare_images("xe1 (4).jpg", "xe97B.jpg") #khác xe cùng màu
-# compare_images("bearnau.jpg", "bearnauB.jpg") #cùng may
-
